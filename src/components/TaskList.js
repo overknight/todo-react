@@ -2,7 +2,15 @@ import { Task } from './Task';
 
 const err_incorrectData = new TypeError('incorrect data format');
 
-export const TaskList = ({ dataSrc, onTaskStatusChange, onTaskRemove, beginEditTask, editingTask = false }) => {
+export const TaskList = ({
+  dataSrc,
+  onTaskStatusChange,
+  onTaskRemove,
+  beginEditTask,
+  cancelTaskEditing,
+  finishTaskEdit,
+  editingTask = false,
+}) => {
   const elements = dataSrc.map((item) => {
     const { id, ...taskInfo } = item;
     return (
@@ -13,6 +21,8 @@ export const TaskList = ({ dataSrc, onTaskStatusChange, onTaskRemove, beginEditT
         onRemove={onTaskRemove.bind(null, id)}
         isEditingOtherTask={editingTask}
         onEditStart={beginEditTask}
+        onEditCanceled={cancelTaskEditing}
+        onEditFinished={finishTaskEdit.bind(null, id)}
       />
     );
   });

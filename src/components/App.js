@@ -86,6 +86,26 @@ class App extends Component {
     this.setState({ editingTask: true });
   };
 
+  taskEditCanceled = () => {
+    this.setState({ editingTask: false });
+  };
+
+  taskEditFinished = (id, newValue) => {
+    newValue = newValue.trimEnd();
+    this.setState(({ data }) => {
+      if (newValue == '') return { editingTask: false };
+      const newData = [...data];
+      const idx = newData.findIndex((item) => item.id === id);
+      if (idx > -1) {
+        newData[idx] = {
+          ...newData[idx],
+          title: newValue,
+        };
+      }
+      return { data: newData, editingTask: false };
+    });
+  };
+
   render() {
     const { currentFilter } = this.state;
     let { data } = this.state;
@@ -103,6 +123,8 @@ class App extends Component {
             onTaskRemove={this.removeTask}
             editingTask={this.state.editingTask}
             beginEditTask={this.taskEditStarted}
+            cancelTaskEditing={this.taskEditCanceled}
+            finishTaskEdit={this.taskEditFinished}
           />
           <Footer
             dataSrc={this.state.data}

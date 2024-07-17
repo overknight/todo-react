@@ -1,8 +1,34 @@
 import { Component } from 'react';
 import { formatDistanceToNow } from 'date-fns';
 
+const keyboardHandler = function (e) {
+  if (e.type != 'keyup') return;
+  if (e.keyCode == 27) {
+    // esc key
+    this.setState({
+      editingTitle: false,
+      value: this.props.title,
+    });
+    this.props.onEditCanceled();
+  }
+  if (e.keyCode == 13) {
+    // enter key
+    this.setState({ value: this.state.value.trimEnd(), editingTitle: false });
+    this.props.onEditFinished(this.state.value);
+  }
+};
+
 const taskEditorField = (taskRef) => {
-  return <input type="text" className="edit" value={taskRef.state.value} onChange={taskRef.onTitleEdited} autoFocus />;
+  return (
+    <input
+      type="text"
+      className="edit"
+      value={taskRef.state.value}
+      onChange={taskRef.onTitleEdited}
+      onKeyUp={keyboardHandler.bind(taskRef)}
+      autoFocus
+    />
+  );
 };
 
 export class Task extends Component {
@@ -24,7 +50,7 @@ export class Task extends Component {
   };
 
   onTitleEdited = (e) => {
-    this.setState({ value: e.target.value });
+    this.setState({ value: e.target.value.trimStart() });
   };
 
   remove = () => {
