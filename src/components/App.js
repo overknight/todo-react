@@ -44,8 +44,9 @@ class App extends Component {
     e.preventDefault();
     const inputField = e.target.querySelector('[name="new-task-name"]');
     if (!inputField) return;
+    if (!inputField.value) return;
     this.setState(({ data }) => {
-      const title = inputField.value;
+      const title = inputField.value.trimEnd();
       inputField.value = '';
       return { data: [...data, createTask({ title, creationDate: Date.now() })] };
     });
