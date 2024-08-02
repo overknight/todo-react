@@ -95,10 +95,10 @@ button::-moz-focus-inner {
 .todo-list li label .created {
   font-size: 13px;
   color: gray;
+  text-align: center;
 }
 
 .todo-list li label .created {
-  text-align: center;
   flex-basis: 15%;
 }
 
@@ -117,17 +117,17 @@ button::-moz-focus-inner {
   text-decoration: line-through;
 }
 
-.todo-list li label button.timer {
+.todo-list li label .timer {
   fill: #cc9a9a;
   cursor: pointer;
   flex-basis: 10%;
 }
 
-.todo-list li label button.timer:hover {
+.todo-list li label .timer:hover {
   fill: #af5b5e;
 }
 
-.todo-list li label button.timer * {
+.todo-list li label .timer * {
   vertical-align: middle;
 }
 

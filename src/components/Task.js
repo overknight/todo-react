@@ -48,7 +48,6 @@ export class Task extends Component {
 
   componentDidMount() {
     visibleTasks.push(this);
-    if (this.props.running) this.props.onTimerStart();
   }
 
   componentWillUnmount() {
@@ -71,13 +70,6 @@ export class Task extends Component {
     this.props.onRemove();
   };
 
-  toggleTimer = (e) => {
-    if (!this.props.completed) e.stopPropagation();
-    if (!this.props.running) this.props.onTimerStart();
-    const event = new CustomEvent('timerToggle', { detail: { running: this.props.running } });
-    this.props.onInfoUpdate(event);
-  };
-
   render() {
     const { title, completed = false, isEditingOtherTask = false, duration, running, onInfoUpdate } = this.props;
     const { editingTitle, formattedAge } = this.state;
@@ -95,20 +87,14 @@ export class Task extends Component {
     );
     const view = (
       <div className="view">
-        <label>
-          <input
-            className="toggle"
-            type="checkbox"
-            title="Toggle status"
-            defaultChecked={completed}
-            onChange={onInfoUpdate}
-          />
+        <label onClick={onInfoUpdate}>
+          <input className="toggle" type="checkbox" title="Toggle status" defaultChecked={completed} />
           <span className="status-indicator"></span>
           <span className="description">{title}</span>
-          <button className="timer" disabled={completed} title={btnTimerTitle} onClick={this.toggleTimer}>
+          <div className="timer" title={btnTimerTitle}>
             {btnTimerIcon}
             <span>{format(duration, 'mm:ss')}</span>
-          </button>
+          </div>
           <span className="created">{formattedAge}</span>
         </label>
         <button

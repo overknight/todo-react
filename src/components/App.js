@@ -2,7 +2,7 @@ import { Component } from 'react';
 import { formatDistanceToNow } from 'date-fns';
 
 import { NewTaskForm } from './NewTaskForm';
-import { TaskList, visibleTasks, runningTasks } from './TaskList';
+import { TaskList, visibleTasks, runningTasks, startTaskTimer } from './TaskList';
 import { Footer } from './Footer';
 
 const Header = (props) => {
@@ -52,21 +52,35 @@ class App extends Component {
   };
 
   updateTaskInfo = (id, e) => {
+    let target = e.target;
+    if (target.className != 'toggle')
+      while (target.constructor !== HTMLLabelElement) {
+        if (target.className == 'timer') {
+          e.preventDefault();
+          break;
+        }
+        target = target.parentElement;
+      }
+    if (!~['toggle', 'timer'].indexOf(target.className)) return;
     this.setState(({ data }) => {
       const newData = [...data];
       const idx = newData.findIndex((item) => item.id === id);
       let taskInfo = {};
-      if (e.type == 'change') {
-        taskInfo = { completed: e.target.checked };
-        if (taskInfo.completed) {
-          delete runningTasks[id];
-          taskInfo.running = false;
-        }
-      }
-      if (e.type == 'timerToggle') {
-        const running = !e.detail.running;
+      if (target.className == 'timer' && newData[idx].completed) {
+        target.parentElement.querySelector('.toggle').checked = false;
+        taskInfo.completed = false;
+      } else if (target.className == 'timer') {
+        const running = !newData[idx].running;
         if (!running) delete runningTasks[id];
+        else startTaskTimer(id);
         taskInfo = { running };
+      } else {
+        const completed = !newData[idx].completed;
+        taskInfo = { completed };
+        if (completed && newData[idx].running) {
+          taskInfo.running = false;
+          delete runningTasks[id];
+        }
       }
       newData[idx] = {
         ...newData[idx],
@@ -143,6 +157,9 @@ class App extends Component {
   };
 
   componentDidMount() {
+    for (const task of this.state.data) {
+      if (task.running) startTaskTimer(task.id);
+    }
     if (!idRefreshInterval) idRefreshInterval = setInterval(this.updateDurations, 1000);
   }
 

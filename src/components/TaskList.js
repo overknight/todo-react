@@ -6,7 +6,7 @@ export { visibleTasks };
 
 export const runningTasks = {};
 
-const startTaskTimer = function (id) {
+export const startTaskTimer = function (id) {
   runningTasks[id] = { lastUpdate: Date.now() };
 };
 
@@ -31,7 +31,6 @@ export const TaskList = ({
         onEditStart={beginEditTask}
         onEditCanceled={cancelTaskEditing}
         onEditFinished={finishTaskEdit.bind(null, id)}
-        onTimerStart={startTaskTimer.bind(null, id)}
       />
     );
   });
