@@ -1,10 +1,18 @@
-import { Task } from './Task';
+import { Task, visibleTasks } from './Task';
 
 const err_incorrectData = new TypeError('incorrect data format');
 
+export { visibleTasks };
+
+export const runningTasks = {};
+
+const startTaskTimer = function (id) {
+  runningTasks[id] = { lastUpdate: Date.now() };
+};
+
 export const TaskList = ({
   dataSrc,
-  onTaskStatusChange,
+  onTaskInfoUpdated,
   onTaskRemove,
   beginEditTask,
   cancelTaskEditing,
@@ -17,12 +25,13 @@ export const TaskList = ({
       <Task
         key={id}
         {...taskInfo}
-        onStatusChange={onTaskStatusChange.bind(null, id)}
+        onInfoUpdate={onTaskInfoUpdated.bind(null, id)}
         onRemove={onTaskRemove.bind(null, id)}
         isEditingOtherTask={editingTask}
         onEditStart={beginEditTask}
         onEditCanceled={cancelTaskEditing}
         onEditFinished={finishTaskEdit.bind(null, id)}
+        onTimerStart={startTaskTimer.bind(null, id)}
       />
     );
   });

@@ -1,7 +1,8 @@
 import { Component } from 'react';
+import { formatDistanceToNow } from 'date-fns';
 
 import { NewTaskForm } from './NewTaskForm';
-import { TaskList } from './TaskList';
+import { TaskList, visibleTasks, runningTasks } from './TaskList';
 import { Footer } from './Footer';
 
 const Header = (props) => {
@@ -21,44 +22,55 @@ const filterFunctions = {
 
 let newTaskID = 1;
 
-const createTask = ({ title, completed, creationDate }) => {
+const createTask = ({ title, completed, running, duration, creationDate }) => {
   const id = newTaskID++;
   const result = { title, id };
   if (completed) Object.assign(result, { completed });
+  if (running) Object.assign(result, { running });
+  if (duration) Object.assign(result, { duration });
   if (creationDate) Object.assign(result, { creationDate });
   return result;
 };
 
+let idRefreshInterval;
+
 class App extends Component {
   state = {
     data: [
-      createTask({ title: 'Completed task', creationDate: 1720812970158, completed: true }),
+      createTask({ title: 'Completed task', duration: 745000, creationDate: 1720812970158, completed: true }),
       createTask({ title: 'Editing task' }),
-      createTask({ title: 'Active task', creationDate: 1720628035017 }),
+      createTask({ title: 'Active task', running: true, creationDate: 1720628035017 }),
     ],
     currentFilter: 'All',
     editingTask: false,
   };
 
-  newTask = (e) => {
-    e.preventDefault();
-    const inputField = e.target.querySelector('[name="new-task-name"]');
-    if (!inputField) return;
-    if (!inputField.value) return;
+  newTask = (taskInfo, callback) => {
     this.setState(({ data }) => {
-      const title = inputField.value.trimEnd();
-      inputField.value = '';
-      return { data: [...data, createTask({ title, creationDate: Date.now() })] };
-    });
+      return { data: [...data, createTask(taskInfo)] };
+    }, callback);
   };
 
-  toggleTaskStatus = (id) => {
+  updateTaskInfo = (id, e) => {
     this.setState(({ data }) => {
       const newData = [...data];
       const idx = newData.findIndex((item) => item.id === id);
+      let taskInfo = {};
+      if (e.type == 'change') {
+        taskInfo = { completed: e.target.checked };
+        if (taskInfo.completed) {
+          delete runningTasks[id];
+          taskInfo.running = false;
+        }
+      }
+      if (e.type == 'timerToggle') {
+        const running = !e.detail.running;
+        if (!running) delete runningTasks[id];
+        taskInfo = { running };
+      }
       newData[idx] = {
         ...newData[idx],
-        completed: !newData[idx].completed,
+        ...taskInfo,
       };
       return { data: newData };
     });
@@ -68,6 +80,7 @@ class App extends Component {
     this.setState(({ data }) => {
       const newData = [...data];
       const idx = newData.findIndex((item) => item.id === id);
+      if (newData[idx].running) delete runningTasks[id];
       return { data: [...newData.slice(0, idx), ...newData.slice(idx + 1)] };
     });
   };
@@ -106,6 +119,33 @@ class App extends Component {
     });
   };
 
+  updateDurations = () => {
+    for (const task of visibleTasks) {
+      const timeDistance = formatDistanceToNow(task.props.creationDate);
+      if (timeDistance != task.state.formattedAge) {
+        task.setState({ formattedAge: timeDistance });
+      }
+    }
+    this.setState(({ data }) => {
+      const newData = [...data];
+      const now = Date.now();
+      for (const [id, { lastUpdate }] of Object.entries(runningTasks)) {
+        const idx = newData.findIndex((item) => item.id == id);
+        if (!~idx) return;
+        const timeDelta = now - lastUpdate;
+        let duration = newData[idx].duration || 0;
+        duration += timeDelta;
+        newData[idx] = { ...newData[idx], duration };
+        runningTasks[id].lastUpdate = now;
+      }
+      return { data: newData };
+    });
+  };
+
+  componentDidMount() {
+    if (!idRefreshInterval) idRefreshInterval = setInterval(this.updateDurations, 1000);
+  }
+
   render() {
     const { currentFilter } = this.state;
     let { data } = this.state;
@@ -119,7 +159,7 @@ class App extends Component {
         <section className="main">
           <TaskList
             dataSrc={data}
-            onTaskStatusChange={this.toggleTaskStatus}
+            onTaskInfoUpdated={this.updateTaskInfo}
             onTaskRemove={this.removeTask}
             editingTask={this.state.editingTask}
             beginEditTask={this.taskEditStarted}

@@ -88,11 +88,18 @@ button::-moz-focus-inner {
   justify-content: space-between;
   padding: 15px 85px 15px 60px;
   cursor: pointer;
+  min-height: 45px;
 }
 
+.todo-list li label .timer,
 .todo-list li label .created {
   font-size: 13px;
   color: gray;
+}
+
+.todo-list li label .created {
+  text-align: center;
+  flex-basis: 15%;
 }
 
 .todo-list li label .description {
@@ -102,11 +109,26 @@ button::-moz-focus-inner {
   transition: color 0.4s;
   font-weight: 400;
   color: #4d4d4d;
+  flex-basis: 75%;
 }
 
 .todo-list li.completed label .description {
   color: #cdcdcd;
   text-decoration: line-through;
+}
+
+.todo-list li label button.timer {
+  fill: #cc9a9a;
+  cursor: pointer;
+  flex-basis: 10%;
+}
+
+.todo-list li label button.timer:hover {
+  fill: #af5b5e;
+}
+
+.todo-list li label button.timer * {
+  vertical-align: middle;
 }
 
 .todo-list li .icon {
@@ -117,7 +139,7 @@ button::-moz-focus-inner {
   height: 40px;
   font-size: 34px;
   color: #cc9a9a;
-  margin: auto 0 11px;
+  margin: auto 0;
   transition: color 0.2s ease-out;
   cursor: pointer;
 }
