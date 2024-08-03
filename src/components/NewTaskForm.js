@@ -23,6 +23,7 @@ export class NewTaskForm extends Component {
   newTask = (e) => {
     e.preventDefault();
     const title = this.state.value;
+    if (!title) return;
     const creationDate = Date.now();
     const newTaskInfo = { title, creationDate };
     const { min = 0, sec = 0 } = this.state.timer;
