@@ -7,15 +7,16 @@ const keyboardHandler = function (e) {
   if (e.type != 'keyup') return;
   if (e.keyCode == 27) {
     // esc key
-    this.setState({
-      editingTitle: false,
-      value: this.props.title,
-    });
-    this.props.onEditCanceled();
+    this.cancelEdit();
   }
   if (e.keyCode == 13) {
     // enter key
-    this.setState({ value: this.state.value.trimEnd(), editingTitle: false });
+    const value = this.state.value.trimEnd();
+    if (!value) {
+      this.cancelEdit();
+      return;
+    }
+    this.setState({ value, editingTitle: false });
     this.props.onEditFinished(this.state.value);
   }
 };
@@ -28,6 +29,7 @@ const taskEditorField = (taskRef) => {
       value={taskRef.state.value}
       onChange={taskRef.onTitleEdited}
       onKeyUp={keyboardHandler.bind(taskRef)}
+      onBlur={taskRef.cancelEdit}
       autoFocus
     />
   );
@@ -60,6 +62,14 @@ export class Task extends Component {
       newValue: this.props.title,
     });
     this.props.onEditStart(e);
+  };
+
+  cancelEdit = () => {
+    this.setState({
+      editingTitle: false,
+      value: this.props.title,
+    });
+    this.props.onEditCanceled();
   };
 
   onTitleEdited = (e) => {

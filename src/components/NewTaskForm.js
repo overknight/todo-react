@@ -30,13 +30,14 @@ export class NewTaskForm extends Component {
     if (duration > 0) Object.assign(newTaskInfo, { duration });
     this.props.app.newTask(newTaskInfo, () => {
       this.setState({ value: '', timer: {} });
-      e.target.querySelector('[name="new-task-name"]').focus();
+      if (/mobile/i.test(navigator.userAgent)) document.activeElement.blur();
+      else e.target.querySelector('[name="new-task-name"]').focus();
     });
   };
 
   render() {
     return (
-      <form className="new-todo-form" onSubmit={this.newTask}>
+      <form className="new-todo-form" action="" onSubmit={this.newTask}>
         <input
           type="text"
           name="new-task-name"
@@ -49,6 +50,8 @@ export class NewTaskForm extends Component {
         />
         <input
           type="text"
+          inputMode="numeric"
+          pattern="\d*"
           name="new-task-timer-min"
           className="new-todo-form__timer"
           placeholder="Min"
@@ -58,6 +61,8 @@ export class NewTaskForm extends Component {
         />
         <input
           type="text"
+          inputMode="numeric"
+          pattern="\d*"
           name="new-task-timer-sec"
           className="new-todo-form__timer"
           placeholder="Sec"
@@ -65,7 +70,7 @@ export class NewTaskForm extends Component {
           value={this.state.timer.sec || ''}
           onChange={this.setTimer}
         />
-        <input type="submit" hidden />
+        <input type="submit" style={{ visibility: 'hidden', width: '0', margin: '0', padding: '0', border: 'none' }} />
       </form>
     );
   }
