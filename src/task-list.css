@@ -48,6 +48,7 @@ button::-moz-focus-inner {
 .todo-list li.editing .edit {
   display: block;
   width: 100%;
+  min-height: 75px;
   padding: 12px 16px;
   padding-left: 60px;
 }

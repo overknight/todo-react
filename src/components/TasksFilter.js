@@ -1,8 +1,9 @@
-export const TasksFilter = ({ applyFilter, currentFilter }) => {
+export const TasksFilter = ({ filter }) => {
+  const currentFilter = filter.toString();
   const filterOptions = ['All', ' ', 'Active', ' ', 'Completed'].map((item) => {
     if (item === ' ') return item;
     let [action, selectionMark] = [
-      item !== currentFilter ? applyFilter : null,
+      item !== currentFilter ? filter.apply : null,
       item === currentFilter ? 'selected' : null,
     ];
     return (

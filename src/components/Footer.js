@@ -1,19 +1,16 @@
 import { TasksFilter } from './TasksFilter';
 
-export const Footer = ({ dataSrc, currentFilter, parent: app }) => {
-  const completedTasksCount = dataSrc.filter((item) => item.completed).length;
-  const uncompletedTasksCount = dataSrc.length - completedTasksCount;
+export const Footer = ({ taskCounters, filter, removeCompleted }) => {
   let tasksMessage = 'no active tasks';
-  if (uncompletedTasksCount > 0) {
-    tasksMessage = uncompletedTasksCount + ' item' + (uncompletedTasksCount > 1 ? 's' : '') + ' left';
+  if (taskCounters.uncompleted > 0) {
+    tasksMessage = taskCounters.uncompleted + ' item' + (taskCounters.uncompleted > 1 ? 's' : '') + ' left';
   }
-  const filterButtons =
-    uncompletedTasksCount === 0 ? null : <TasksFilter applyFilter={app.setFilter} currentFilter={currentFilter} />;
+  const filterButtons = taskCounters.uncompleted === 0 ? null : <TasksFilter {...{ filter }} />;
   const btn_clearCompleted = {
     className: 'clear-completed',
-    onClick: completedTasksCount > 0 ? app.removeCompletedTasks : null,
+    onClick: taskCounters.completed > 0 ? removeCompleted : null,
   };
-  if (completedTasksCount === 0) btn_clearCompleted.className += ' disabled';
+  if (taskCounters.completed === 0) btn_clearCompleted.className += ' disabled';
   return (
     <footer className="footer">
       <span className="todo-count">{tasksMessage}</span>
