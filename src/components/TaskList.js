@@ -99,18 +99,21 @@ export const taskActions = (() => {
 export const taskEditor = (() => {
   let editorTarget = NaN,
     setEditorTarget = null,
-    domTarget = null;
+    setActiveState = null;
   const deactivate = () => {
-    domTarget = null;
     setEditorTarget(NaN);
+    setActiveState(false);
+    setActiveState = null;
   };
   return Object.defineProperties(
     {
       getHooks: function () {
         [editorTarget, setEditorTarget] = arguments;
       },
-      begin: (taskID, eventTarget) => {
-        domTarget = eventTarget;
+      getTaskHook: (hook) => {
+        setActiveState = hook;
+      },
+      begin: (taskID) => {
         setEditorTarget(taskID);
       },
       cancel: () => {
@@ -123,20 +126,12 @@ export const taskEditor = (() => {
       },
     },
     {
-      active: {
+      taskID: {
         get() {
-          return Boolean(domTarget);
+          return editorTarget;
         },
         set() {
-          throw new Error('property active is read only');
-        },
-      },
-      domRef: {
-        get() {
-          return domTarget;
-        },
-        set() {
-          throw new Error('property domTarget is read only');
+          throw new Error('forbidden to explicitly change editor target');
         },
       },
     }
@@ -166,9 +161,7 @@ const taskInfoEventHandler = (id, event) => {
     }
   const action = actionsMap.get(target.className);
   if (!action) return;
-  const args = [id];
-  if (target.className == 'icon icon-edit') args.push(target);
-  action(...args);
+  action(id);
 };
 
 export const TaskList = ({ dataSrc }) => {

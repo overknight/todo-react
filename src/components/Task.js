@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect } from 'react';
 import { formatDistanceToNow, format } from 'date-fns';
 
 export const visibleTasks = new Set();
@@ -33,16 +33,27 @@ const taskEditorField = (value, editor) => {
   );
 };
 
+const useEditor = (editor, action) => {
+  const [isEditiorActive, setEditingTitle] = useState(false);
+  return {
+    isEditiorActive,
+    onStartEdit: (e) => {
+      editor.getTaskHook(setEditingTitle);
+      setEditingTitle(true);
+      action(e);
+    },
+  };
+};
+
 export const Task = ({
   title,
   completed = false,
-  editor,
+  editor = { taskID: NaN },
   duration = 0,
   running,
   onTaskAction,
   creationDate = Date.now(),
 }) => {
-  const btnRef = useRef();
   const [formattedAge, setFormattedAge] = useState(formatDistanceToNow(creationDate));
   useEffect(() => {
     const hooks = {};
@@ -69,7 +80,9 @@ export const Task = ({
       visibleTasks.delete(hooks);
     };
   }, []);
-  const editable = !completed && !editor.active;
+  const { isEditiorActive, onStartEdit } = useEditor(editor, onTaskAction);
+  const isEditingOtherTask = !isNaN(editor.taskID);
+  const editable = !completed && !isEditingOtherTask;
   const btnTimerTitle = (completed ? '' : running ? 'stop ' : 'start ') + 'task timer';
   const btnTimerIcon = completed ? null : running ? (
     <svg width="18px" height="18px" viewBox="0 0 16 12" xmlns="http://www.w3.org/2000/svg">
@@ -94,22 +107,19 @@ export const Task = ({
         <span className="created">{formattedAge}</span>
       </label>
       <button
-        ref={btnRef}
         className={editable ? 'icon icon-edit' : 'icon icon-edit disabled'}
         title="Edit task"
-        onClick={editable ? onTaskAction : null}
+        onClick={editable ? onStartEdit : null}
       ></button>
       <button className="icon icon-destroy" title="Destroy task" onClick={onTaskAction}></button>
     </div>
   );
   let taskStatus = completed ? 'completed' : null;
-  let isEditing = Boolean(editor.domRef);
-  if (isEditing) isEditing = btnRef.current === editor.domRef;
-  if (isEditing) taskStatus = 'editing';
+  if (isEditiorActive) taskStatus = 'editing';
   return (
     <li className={taskStatus}>
       {view}
-      {isEditing ? taskEditorField(title, editor) : null}
+      {isEditiorActive ? taskEditorField(title, editor) : null}
     </li>
   );
 };
